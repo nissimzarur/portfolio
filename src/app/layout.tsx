@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { GSAPProvider } from "@/providers/GSAPProvider";
+import { SmoothScrollProvider } from "@/providers/SmoothScrollProvider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -51,7 +53,13 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <GSAPProvider>
+          <SmoothScrollProvider>
+            {children}
+          </SmoothScrollProvider>
+        </GSAPProvider>
+      </body>
     </html>
   );
 }
