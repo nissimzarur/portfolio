@@ -77,7 +77,7 @@ export function MilestoneMarker({
       )}
 
       {/* Tooltip label on hover */}
-      <title>{milestone.company} ({milestone.period.start})</title>
+      <title>{`${milestone.company} (${milestone.period.start})`}</title>
     </g>
   );
 }

@@ -126,7 +126,7 @@ export function JourneyRoute() {
               {/* Milestone markers */}
               {milestones.map((m, i) => {
                 const markerProgress = (i + 0.5) / milestones.length;
-                const point = pathRef.current
+                const point = pathRef.current && pathLength > 0
                   ? pathRef.current.getPointAtLength(markerProgress * pathLength)
                   : { x: 50, y: markerProgress * 800 };
                 const state =

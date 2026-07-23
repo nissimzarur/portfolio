@@ -4,15 +4,11 @@ import { useEffect, type ReactNode } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-let registered = false;
+// Register at module level so ScrollTrigger is available before any useEffect fires
+gsap.registerPlugin(ScrollTrigger);
 
 export function GSAPProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
-    if (!registered) {
-      gsap.registerPlugin(ScrollTrigger);
-      registered = true;
-    }
-
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
