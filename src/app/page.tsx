@@ -12,6 +12,7 @@ import { Contact } from '@/components/sections/Contact';
 import { JourneyNavigator } from '@/components/journey/JourneyNavigator';
 import { MobileChapterNav } from '@/components/journey/MobileChapterNav';
 import { ScrollProgressBar } from '@/components/animations/ScrollProgressBar';
+import { Preloader } from '@/components/preloader/Preloader';
 
 const Scene = dynamic(() => import('@/components/canvas/Scene'), {
   ssr: false,
@@ -29,6 +30,7 @@ export default function Home() {
   return (
     <>
       <ScrollProgressBar />
+      <Preloader />
       {/* 3D canvas background */}
       <Scene />
 
