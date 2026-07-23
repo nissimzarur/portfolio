@@ -11,6 +11,7 @@ import { AboutMe } from '@/components/sections/AboutMe';
 import { Contact } from '@/components/sections/Contact';
 import { JourneyNavigator } from '@/components/journey/JourneyNavigator';
 import { MobileChapterNav } from '@/components/journey/MobileChapterNav';
+import { ScrollProgressBar } from '@/components/animations/ScrollProgressBar';
 
 const Scene = dynamic(() => import('@/components/canvas/Scene'), {
   ssr: false,
@@ -27,6 +28,7 @@ const ChatPanel = dynamic(
 export default function Home() {
   return (
     <>
+      <ScrollProgressBar />
       {/* 3D canvas background */}
       <Scene />
 
