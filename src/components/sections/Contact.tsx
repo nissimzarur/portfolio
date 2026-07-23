@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Mail, Phone, MapPin, FileText, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import gsap from 'gsap';
 import { portfolioData } from '@/data/portfolio';
 import { Button } from '@/components/ui/Button';
 import { SectionContainer } from '@/components/ui/SectionContainer';
-import { MotionWrapper } from '@/components/ui/MotionWrapper';
+import { SplitText } from '@/components/animations/SplitText';
+import { MagneticElement } from '@/components/animations/MagneticElement';
 
 type Intent = 'hiring' | 'project';
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
@@ -14,6 +16,7 @@ type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 export function Contact() {
   const searchParams = useSearchParams();
   const { personal } = portfolioData;
+  const successRef = useRef<HTMLDivElement>(null);
 
   const [intent, setIntent] = useState<Intent>('hiring');
   const [name, setName] = useState('');
@@ -24,6 +27,7 @@ export function Contact() {
   const [timeline, setTimeline] = useState('');
   const [status, setStatus] = useState<FormStatus>('idle');
   const [errors, setErrors] = useState<string[]>([]);
+  const [activeField, setActiveField] = useState<string | null>(null);
 
   useEffect(() => {
     const intentParam = searchParams.get('intent');
@@ -31,6 +35,18 @@ export function Contact() {
       setIntent(intentParam);
     }
   }, [searchParams]);
+
+  // Success animation
+  useEffect(() => {
+    if (status === 'success' && successRef.current) {
+      gsap.from(successRef.current, {
+        scale: 0.9,
+        opacity: 0,
+        duration: 0.5,
+        ease: 'back.out(1.7)',
+      });
+    }
+  }, [status]);
 
   const validate = (): string[] => {
     const errs: string[] = [];
@@ -93,18 +109,32 @@ export function Contact() {
         ? "Tell me about your project and let's explore how I can help"
         : "Whether you're hiring or have a project in mind, I'd love to hear from you";
 
+  const fieldGlowClass = (fieldName: string) =>
+    activeField === fieldName
+      ? 'form-input ring-1 ring-amber/50 shadow-[0_0_12px_rgba(232,168,69,0.15)]'
+      : 'form-input';
+
   return (
     <SectionContainer id="contact">
-      <MotionWrapper>
-        <h2 className="font-display text-3xl md:text-4xl font-bold text-primary">
-          Let&apos;s Work Together
-        </h2>
-        <p className="mt-3 text-secondary text-lg max-w-2xl">{subheading}</p>
-      </MotionWrapper>
+      <SplitText
+        variant="words-up"
+        tag="h2"
+        className="font-display text-3xl md:text-4xl font-bold text-primary"
+      >
+        {"Let's Work Together"}
+      </SplitText>
+      <SplitText
+        variant="lines-up"
+        tag="p"
+        className="mt-3 text-secondary text-lg max-w-2xl"
+        delay={0.1}
+      >
+        {subheading}
+      </SplitText>
 
       <div className="mt-12 grid grid-cols-1 lg:grid-cols-5 gap-12">
         {/* Form */}
-        <MotionWrapper delay={0.1} className="lg:col-span-3">
+        <div className="lg:col-span-3">
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             {/* Intent toggle */}
             <div className="flex gap-2">
@@ -127,8 +157,10 @@ export function Contact() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onFocus={() => setActiveField('name')}
+                onBlur={() => setActiveField(null)}
                 maxLength={100}
-                className="form-input"
+                className={fieldGlowClass('name')}
                 placeholder="Your name"
               />
             </FormField>
@@ -138,7 +170,9 @@ export function Contact() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="form-input"
+                onFocus={() => setActiveField('email')}
+                onBlur={() => setActiveField(null)}
+                className={fieldGlowClass('email')}
                 placeholder="you@company.com"
               />
             </FormField>
@@ -148,8 +182,10 @@ export function Contact() {
                 type="text"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
+                onFocus={() => setActiveField('company')}
+                onBlur={() => setActiveField(null)}
                 maxLength={100}
-                className="form-input"
+                className={fieldGlowClass('company')}
                 placeholder="Company name (optional)"
               />
             </FormField>
@@ -158,12 +194,14 @@ export function Contact() {
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                onFocus={() => setActiveField('message')}
+                onBlur={() => setActiveField(null)}
                 maxLength={2000}
                 rows={5}
-                className="form-input resize-y min-h-[120px]"
+                className={`${fieldGlowClass('message')} resize-y min-h-[120px]`}
                 placeholder={
                   intent === 'hiring'
-                    ? 'Tell me about the role, team, and what you\'re looking for...'
+                    ? "Tell me about the role, team, and what you're looking for..."
                     : 'Describe your project, goals, and timeline...'
                 }
               />
@@ -175,7 +213,9 @@ export function Contact() {
                   <select
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
-                    className="form-input"
+                    onFocus={() => setActiveField('budget')}
+                    onBlur={() => setActiveField(null)}
+                    className={fieldGlowClass('budget')}
                   >
                     <option value="">Select (optional)</option>
                     <option value="under-5k">Under $5K</option>
@@ -190,7 +230,9 @@ export function Contact() {
                   <select
                     value={timeline}
                     onChange={(e) => setTimeline(e.target.value)}
-                    className="form-input"
+                    onFocus={() => setActiveField('timeline')}
+                    onBlur={() => setActiveField(null)}
+                    className={fieldGlowClass('timeline')}
                   >
                     <option value="">Select (optional)</option>
                     <option value="asap">ASAP</option>
@@ -215,33 +257,35 @@ export function Contact() {
             )}
 
             {status === 'success' ? (
-              <div className="flex items-center gap-2 text-success text-sm p-4 rounded-lg bg-success/10 border border-success/20">
+              <div ref={successRef} className="flex items-center gap-2 text-success text-sm p-4 rounded-lg bg-success/10 border border-success/20">
                 <CheckCircle2 size={18} />
                 <span>Message sent! I&apos;ll get back to you soon.</span>
               </div>
             ) : (
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                disabled={status === 'submitting'}
-                className="w-full sm:w-auto"
-              >
-                {status === 'submitting' ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin mr-2" />
-                    Sending...
-                  </>
-                ) : (
-                  'Send Message'
-                )}
-              </Button>
+              <MagneticElement>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  disabled={status === 'submitting'}
+                  className="w-full sm:w-auto"
+                >
+                  {status === 'submitting' ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Message'
+                  )}
+                </Button>
+              </MagneticElement>
             )}
           </form>
-        </MotionWrapper>
+        </div>
 
         {/* Contact info */}
-        <MotionWrapper delay={0.2} className="lg:col-span-2">
+        <div className="lg:col-span-2">
           <div className="space-y-6">
             <h3 className="font-display text-lg font-semibold text-primary">
               Direct Contact
@@ -269,17 +313,19 @@ export function Contact() {
             </div>
 
             <div className="pt-4 border-t border-subtle">
-              <Button
-                variant="secondary"
-                href="/docs/nissim-resume.pdf"
-                className="w-full justify-center"
-              >
-                <FileText size={18} className="mr-2" />
-                Download Resume
-              </Button>
+              <MagneticElement>
+                <Button
+                  variant="secondary"
+                  href="/docs/nissim-resume.pdf"
+                  className="w-full justify-center"
+                >
+                  <FileText size={18} className="mr-2" />
+                  Download Resume
+                </Button>
+              </MagneticElement>
             </div>
           </div>
-        </MotionWrapper>
+        </div>
       </div>
     </SectionContainer>
   );
