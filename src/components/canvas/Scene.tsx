@@ -9,6 +9,7 @@ import { Lighting } from './Lighting';
 import { AtmosphericBackground } from './AtmosphericBackground';
 import { DepthParticles } from './DepthParticles';
 import { GroundPlane } from './GroundPlane';
+import { ChapterObject } from './chapters/ChapterObject';
 
 /** Triggers re-render when journey progress changes */
 function SceneInvalidator() {
@@ -31,6 +32,7 @@ function SceneContent() {
       <Lighting />
       <AtmosphericBackground />
       <DepthParticles />
+      <ChapterObject />
       <GroundPlane />
       <Preload all />
     </>
