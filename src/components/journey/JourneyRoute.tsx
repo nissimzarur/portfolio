@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { portfolioData } from '@/data/portfolio';
 import { ChapterCard } from './ChapterCard';
@@ -14,6 +15,7 @@ export function JourneyRoute() {
   const { scrollToChapter } = useJourneyProgress();
   const sectionRef = useRef<HTMLElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
+  const glowPathRef = useRef<SVGPathElement>(null);
   const [pathLength, setPathLength] = useState(0);
   const [indicatorPos, setIndicatorPos] = useState({ x: 50, y: 0 });
   const [journeyProgress, setJourneyProgress] = useState(0);
@@ -24,38 +26,25 @@ export function JourneyRoute() {
     }
   }, []);
 
-  // Compute journey progress from actual section scroll position
+  // GSAP ScrollTrigger for journey progress
   useEffect(() => {
-    let rafId = 0;
+    if (!sectionRef.current) return;
 
-    function update() {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const scrolled = -rect.top;
-      const scrollRange = rect.height - window.innerHeight;
-      if (scrollRange <= 0) {
-        setJourneyProgress(0);
-        return;
-      }
-      const p = Math.max(0, Math.min(1, scrolled / scrollRange));
-      setJourneyProgress(p);
-      rafId = 0;
-    }
+    const trigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: true,
+      onUpdate: (self) => {
+        setJourneyProgress(self.progress);
+      },
+    });
 
-    function onScroll() {
-      if (rafId) return;
-      rafId = requestAnimationFrame(update);
-    }
-
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (rafId) cancelAnimationFrame(rafId);
+      trigger.kill();
     };
   }, []);
 
-  // Derive chapter index from local progress (4 equal chapters)
   const milestones = portfolioData.career;
   const chapterIndex = Math.min(
     Math.floor(journeyProgress * milestones.length),
@@ -66,6 +55,13 @@ export function JourneyRoute() {
     if (pathRef.current && pathLength > 0) {
       const point = pathRef.current.getPointAtLength(journeyProgress * pathLength);
       setIndicatorPos({ x: point.x, y: point.y });
+
+      // Sync glow path
+      if (glowPathRef.current) {
+        glowPathRef.current.style.strokeDashoffset = String(
+          pathLength * (1 - journeyProgress)
+        );
+      }
     }
   }, [journeyProgress, pathLength]);
 
@@ -81,6 +77,16 @@ export function JourneyRoute() {
               fill="none"
               aria-hidden="true"
             >
+              <defs>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                <filter id="roadGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="6" result="blur" />
+                </filter>
+              </defs>
+
               {/* Background path */}
               <path
                 d={ROAD_PATH}
@@ -89,6 +95,21 @@ export function JourneyRoute() {
                 strokeLinecap="round"
                 fill="none"
               />
+
+              {/* Glow trail (behind drawn path) */}
+              <path
+                ref={glowPathRef}
+                d={ROAD_PATH}
+                stroke="var(--color-amber)"
+                strokeWidth={8}
+                strokeLinecap="round"
+                fill="none"
+                filter="url(#roadGlow)"
+                strokeDasharray={pathLength}
+                strokeDashoffset={pathLength * (1 - journeyProgress)}
+                opacity={0.3}
+              />
+
               {/* Drawn path */}
               <path
                 ref={pathRef}
@@ -99,7 +120,7 @@ export function JourneyRoute() {
                 fill="none"
                 strokeDasharray={pathLength}
                 strokeDashoffset={pathLength * (1 - journeyProgress)}
-                style={{ transition: 'stroke-dashoffset 0.3s ease-out' }}
+                style={{ transition: 'stroke-dashoffset 0.1s linear' }}
               />
 
               {/* Milestone markers */}
@@ -107,7 +128,7 @@ export function JourneyRoute() {
                 const markerProgress = (i + 0.5) / milestones.length;
                 const point = pathRef.current
                   ? pathRef.current.getPointAtLength(markerProgress * pathLength)
-                  : { x: 50, y: (markerProgress * 800) };
+                  : { x: 50, y: markerProgress * 800 };
                 const state =
                   i < chapterIndex
                     ? 'completed'
@@ -134,12 +155,6 @@ export function JourneyRoute() {
                 fill="var(--color-amber)"
                 filter="url(#glow)"
               />
-              <defs>
-                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="4" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-              </defs>
             </svg>
           </div>
 
