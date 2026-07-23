@@ -1,0 +1,17 @@
+// Server-only OpenAI client (lazy initialization)
+// Never import this module from client-side code.
+import 'server-only';
+
+import OpenAI from 'openai';
+
+let _openai: OpenAI | null = null;
+
+export function getOpenAI(): OpenAI | null {
+  if (!process.env.OPENAI_API_KEY) return null;
+  if (!_openai) {
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return _openai;
+}
+
+export const MODEL = process.env.OPENAI_MODEL || 'o4-mini';
