@@ -51,7 +51,7 @@ export function Hero() {
   useEffect(() => {
     if (reducedMotion || !ctaRef.current) return;
 
-    gsap.from(ctaRef.current.children, {
+    const tween = gsap.from(ctaRef.current.children, {
       opacity: 0,
       y: 20,
       duration: 0.6,
@@ -59,19 +59,23 @@ export function Hero() {
       delay: 2.0,
       ease: 'power2.out',
     });
+
+    return () => { tween.kill(); };
   }, [reducedMotion]);
 
   // Portrait entrance
   useEffect(() => {
     if (reducedMotion || !portraitRef.current) return;
 
-    gsap.from(portraitRef.current, {
+    const tween = gsap.from(portraitRef.current, {
       opacity: 0,
       scale: 0.9,
       duration: 0.8,
       delay: 0.5,
       ease: 'power2.out',
     });
+
+    return () => { tween.kill(); };
   }, [reducedMotion]);
 
   // Scroll indicator fades out after scrolling past 5vh

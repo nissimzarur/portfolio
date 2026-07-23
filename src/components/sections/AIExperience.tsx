@@ -23,8 +23,6 @@ export function AIExperience() {
   useEffect(() => {
     if (reducedMotion) return;
 
-    gsap.registerPlugin(ScrollTrigger);
-
     const tweens: gsap.core.Tween[] = [];
 
     // Animate diagram nodes and arrows
