@@ -109,7 +109,7 @@ body {
   padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
   color: var(--color-primary);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.3s, ring-color 0.3s;
 }
 
 .form-input::placeholder {
@@ -151,4 +151,30 @@ select.form-input {
     2px 2px,
     5px 5px,
     3px 3px;
+}
+
+/* -- Animation Utilities -- */
+
+/* Chapter transition flash */
+@keyframes chapter-flash {
+  0% { opacity: 0; transform: scaleX(0); }
+  50% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+.chapter-flash {
+  animation: chapter-flash 0.4s ease-out forwards;
+}
+
+/* Preloader cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '|';
+  animation: blink 0.8s infinite;
+  color: var(--color-amber);
+  margin-left: 2px;
 }
